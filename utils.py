@@ -26,7 +26,7 @@ def loadData(filename):
     return data
 
 
-def plotVesselTracks(latLon, clu=None, fig=plt.figure()):
+def plotVesselTracks(latLon, clu=None, fig=None):
     # Plot vessel tracks using different colors and markers with vessels
     # given by clu
 
@@ -36,6 +36,8 @@ def plotVesselTracks(latLon, clu=None, fig=plt.figure()):
     cluUnique = np.array(np.unique(clu), dtype=int)
 
     # plt.figure()
+    if (fig == None):
+        plt.figure()
     fig
     markerList = list(markers.MarkerStyle.markers.keys())
 
@@ -46,8 +48,9 @@ def plotVesselTracks(latLon, clu=None, fig=plt.figure()):
             latLon[objLabel, 0].ravel(), latLon[objLabel, 1].ravel(),
             marker=markerList[iClu % len(markerList)],
             c=clu[objLabel], norm=normClu, label=iClu)
-    # figure.canvas.draw()
-    # plt.colorbar(imClu)
-    # plt.legend().set_draggable(True)
-    # plt.xlabel('Longitude')
-    # plt.ylabel('Latitude')
+
+    if (fig == None):
+        plt.colorbar(imClu)
+        plt.legend().set_draggable(True)
+        plt.xlabel('Longitude')
+        plt.ylabel('Latitude')

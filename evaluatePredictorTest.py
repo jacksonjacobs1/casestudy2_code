@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import adjusted_rand_score
 from sklearn.model_selection import train_test_split
 import pandas as pd
+import time
 
 from utils import loadData, plotVesselTracks
 from predictVessel import predictWithK, predictWithoutK
@@ -46,52 +47,43 @@ print(f'Adjusted Rand index given K = {numVessels}: {ariWithK}')
 print(f'Adjusted Rand index for estimated K = {predNumVessels}: '
       + f'{ariWithoutK}')
 
-#%% Plot vessel tracks colored by prediction and actual labels
-#plotVesselTracks(testFeatures[:,[2,1]], predVesselsWithK)
-#plt.title('Vessel tracks by cluster with K')
-#plotVesselTracks(testFeatures[:,[2,1]], predVesselsWithoutK)
-#plt.title('Vessel tracks by cluster without K')
-#plotVesselTracks(testFeatures[:,[2,1]], testLabels)
-#plt.title('Vessel tracks by label')
-#plt.show()
-
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider, Button
-import time
-
-df = pd.read_csv('set3noVID.csv')
-df.sort_values('SEQUENCE_DTTM')
-print(df.head())
-bucSize = 100
-#index = 2
-
-
-fig = plt.figure()
-ax = fig.add_subplot(111)
-plt.ion()
-plt.legend().set_draggable(True)
-plt.xlabel('Longitude')
-plt.ylabel('Latitude')
-
-for index in range(0, len(df), bucSize) :
-    temp = df.iloc[index:index + bucSize]
-    temp2 = temp[['LAT', 'LON']]
-    temp3 = temp2.to_numpy()
-    #print(temp3.shape)
-    plotVesselTracks(temp3, None, fig)
-    fig.canvas.draw()
-    fig.canvas.flush_events()
-    plt.show()
-    time.sleep(0.2)
-    #plt.clf()
+# # %% Plot vessel tracks colored by prediction and actual labels
+plotVesselTracks(testFeatures[:,[2,1]], predVesselsWithK)
+plt.title('Vessel tracks by cluster with K')
+plotVesselTracks(testFeatures[:,[2,1]], predVesselsWithoutK)
+plt.title('Vessel tracks by cluster without K')
+plotVesselTracks(testFeatures[:,[2,1]], testLabels)
+plt.title('Vessel tracks by label')
+plt.show()
 
 
 
-# testData = loadData('set3noVID.csv')
-# testFeatures = testData[:,2:]
-# plotVesselTracks(testFeatures[:,[2,1]])
-# plt.show()
+
+# df = pd.read_csv('set3noVID.csv')
+# df.sort_values('SEQUENCE_DTTM')
+# bucSize = 100
+#
+#
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
+# plt.ion()
+# plt.legend().set_draggable(True)
+# plt.xlabel('Longitude')
+# plt.ylabel('Latitude')
+#
+# for index in range(0, len(df), bucSize) :
+#     temp = df.iloc[index:index + bucSize]
+#     temp2 = temp[['LAT', 'LON']]
+#     temp3 = temp2.to_numpy()
+#     #print(temp3.shape)
+#     plotVesselTracks(temp3, None, fig)
+#     fig.canvas.draw()
+#     fig.canvas.flush_events()
+#     plt.show()
+#     time.sleep(0.2)
+#     #plt.clf()
+
+
 
 
 
