@@ -29,6 +29,12 @@ def predictWithoutK(testFeatures, trainFeatures=None, trainLabels=None):
     # Arbitrarily assume 20 vessels
     return predictWithK(testFeatures, 20, trainFeatures, trainLabels)
 
+# given the Speed in knots and angle in Angles(thousands), convert to vector with x, y component
+def vectorize(speed, angle) :
+    x = speed*numpy.cos(numpy.radians(angle/10))
+    y = speed*numpy.sin(numpy.radians(angle/10))
+    return x, y
+
 # Run this code only if being used as a script, not being imported
 if __name__ == "__main__":
     
