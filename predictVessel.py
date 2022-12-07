@@ -8,31 +8,47 @@ number of vessels is not specified, assume 20 vessels.
 
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 from sklearn.metrics import adjusted_rand_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
+from sklearn.cluster import SpectralClustering
+from sklearn.cluster import AgglomerativeClustering
+import scipy.cluster.hierarchy as hc
 
 def predictWithK(testFeatures, numVessels, trainFeatures=None, 
                  trainLabels=None):
     # Unsupervised prediction, so training data is unused
     
+    # scaler = StandardScaler()
+    # testFeatures = scaler.fit_transform(testFeatures)
+    # km = KMeans(n_clusters=numVessels, random_state=100)
+    # predVessels = km.fit_predict(testFeatures)
+
+    vector = testFeatures[:, [3,4]]
+    x, y = vectorize(vector[:, 0], vector[:, 1])
+
+    testFeatures = testFeatures[:, [1,2]]
+    testFeatures = np.insert(testFeatures, 2, x, axis=1)
+    testFeatures = np.insert(testFeatures, 3, y, axis=1)
+
     scaler = StandardScaler()
     testFeatures = scaler.fit_transform(testFeatures)
-    km = KMeans(n_clusters=numVessels, random_state=100)
-    predVessels = km.fit_predict(testFeatures)
-    
+
+    model = AgglomerativeClustering(n_clusters=numVessels, linkage='single')
+    predVessels = model.fit_predict(testFeatures)
     return predVessels
 
 def predictWithoutK(testFeatures, trainFeatures=None, trainLabels=None):
     # Unsupervised prediction, so training data is unused
     
     # Arbitrarily assume 20 vessels
-    return predictWithK(testFeatures, 20, trainFeatures, trainLabels)
+    return predictWithK(testFeatures, 8, trainFeatures, trainLabels)
 
 # given the Speed in knots and angle in Angles(thousands), convert to vector with x, y component
 def vectorize(speed, angle) :
-    x = speed*numpy.cos(numpy.radians(angle/10))
-    y = speed*numpy.sin(numpy.radians(angle/10))
+    x = np.multiply(speed, np.cos(np.radians(angle/10)))
+    y = np.multiply(speed, np.sin(np.radians(angle/10)))
     return x, y
 
 # Run this code only if being used as a script, not being imported

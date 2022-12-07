@@ -28,7 +28,8 @@ trainLabels = trainData[:,1]
     #allData[:,2:], allData[:,1], test_size=0.5)
 
 #%% Run prediction algorithms and check accuracy
-#numVessels = np.unique(allData[:,1]).size
+# numVessels = np.unique(allData[:,1]).size
+
 numVessels = np.unique(testLabels).size
 predVesselsWithK = predictWithK(testFeatures, numVessels, trainFeatures,
                                 trainLabels)
@@ -41,13 +42,16 @@ else:
 
 predVesselsWithoutK = predictWithoutK(testFeatures, trainFeatures, trainLabels)
 predNumVessels = np.unique(predVesselsWithoutK).size
+print(predVesselsWithoutK)
+print(predVesselsWithoutK.shape)
+print(testLabels.shape)
 ariWithoutK = adjusted_rand_score(testLabels, predVesselsWithoutK)
 
 print(f'Adjusted Rand index given K = {numVessels}: {ariWithK}')
 print(f'Adjusted Rand index for estimated K = {predNumVessels}: '
       + f'{ariWithoutK}')
 
-# # %% Plot vessel tracks colored by prediction and actual labels
+# %% Plot vessel tracks colored by prediction and actual labels
 plotVesselTracks(testFeatures[:,[2,1]], predVesselsWithK)
 plt.title('Vessel tracks by cluster with K')
 plotVesselTracks(testFeatures[:,[2,1]], predVesselsWithoutK)
@@ -81,7 +85,7 @@ plt.show()
 #     fig.canvas.flush_events()
 #     plt.show()
 #     time.sleep(0.2)
-#     #plt.clf()
+    #plt.clf()
 
 
 
