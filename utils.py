@@ -39,6 +39,7 @@ def plotVesselTracks(latLon, clu=None, fig=None):
     if (fig == None):
         plt.figure()
     fig
+
     markerList = list(markers.MarkerStyle.markers.keys())
 
     normClu = colors.Normalize(np.min(cluUnique), np.max(cluUnique))
@@ -48,6 +49,8 @@ def plotVesselTracks(latLon, clu=None, fig=None):
             latLon[objLabel, 0].ravel(), latLon[objLabel, 1].ravel(),
             marker=markerList[iClu % len(markerList)],
             c=clu[objLabel], norm=normClu, label=iClu)
+        # plt.xlim([-76.34, -75.96])
+        # plt.ylim([36.90, 37.052])
 
     if (fig == None):
         plt.colorbar(imClu)
