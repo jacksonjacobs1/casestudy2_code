@@ -23,13 +23,6 @@ trainData = loadData('set1.csv')
 trainFeatures = trainData[:,2:]
 trainLabels = trainData[:,1]
 
-# allData = trainData
-# trainFeatures, testFeatures, trainLabels, testLabels = train_test_split(
-#     allData[:,2:], allData[:,1], test_size=0.5)
-
-#%% Run prediction algorithms and check accuracy
-# numVessels = np.unique(allData[:,1]).size
-
 numVessels = np.unique(testLabels).size
 # numVessels = 9
 predVesselsWithK = predictWithK(testFeatures, numVessels, trainFeatures,
@@ -44,13 +37,6 @@ else:
 predVesselsWithoutK = predictWithoutK(testFeatures, trainFeatures, trainLabels)
 predNumVessels = np.unique(predVesselsWithoutK).size
 
-# print(predVesselsWithoutK.size)
-#
-# ariWithK2 = adjusted_rand_score(predVesselsWithoutK, predVesselsWithK)
-# ariWithoutK2 = adjusted_rand_score(predVesselsWithK, predVesselsWithoutK)
-# print(f'Adjusted Rand index given K = {numVessels}: {ariWithK2}')
-# print(f'Adjusted Rand index for estimated K = {predNumVessels}: '
-#       + f'{ariWithoutK2}'))
 
 ariWithoutK = adjusted_rand_score(testLabels, predVesselsWithoutK)
 
