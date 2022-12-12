@@ -23,14 +23,15 @@ trainData = loadData('set1.csv')
 trainFeatures = trainData[:,2:]
 trainLabels = trainData[:,1]
 
-#allData = trainData
-#trainFeatures, testFeatures, trainLabels, testLabels = train_test_split(
-    #allData[:,2:], allData[:,1], test_size=0.5)
+# allData = trainData
+# trainFeatures, testFeatures, trainLabels, testLabels = train_test_split(
+#     allData[:,2:], allData[:,1], test_size=0.5)
 
 #%% Run prediction algorithms and check accuracy
 # numVessels = np.unique(allData[:,1]).size
 
 numVessels = np.unique(testLabels).size
+# numVessels = 9
 predVesselsWithK = predictWithK(testFeatures, numVessels, trainFeatures,
                                 trainLabels)
 # Check to ensure that there are at most K vessels. If not, set adjusted
@@ -43,13 +44,21 @@ else:
 predVesselsWithoutK = predictWithoutK(testFeatures, trainFeatures, trainLabels)
 predNumVessels = np.unique(predVesselsWithoutK).size
 
+# print(predVesselsWithoutK.size)
+#
+# ariWithK2 = adjusted_rand_score(predVesselsWithoutK, predVesselsWithK)
+# ariWithoutK2 = adjusted_rand_score(predVesselsWithK, predVesselsWithoutK)
+# print(f'Adjusted Rand index given K = {numVessels}: {ariWithK2}')
+# print(f'Adjusted Rand index for estimated K = {predNumVessels}: '
+#       + f'{ariWithoutK2}'))
+
 ariWithoutK = adjusted_rand_score(testLabels, predVesselsWithoutK)
 
 print(f'Adjusted Rand index given K = {numVessels}: {ariWithK}')
 print(f'Adjusted Rand index for estimated K = {predNumVessels}: '
       + f'{ariWithoutK}')
 
-# # %% Plot vessel tracks colored by prediction and actual labels
+# %% Plot vessel tracks colored by prediction and actual labels
 plotVesselTracks(testFeatures[:,[2,1]], predVesselsWithK)
 plt.title('Vessel tracks by cluster with K')
 plotVesselTracks(testFeatures[:,[2,1]], predVesselsWithoutK)
@@ -57,37 +66,37 @@ plt.title('Vessel tracks by cluster without K')
 plotVesselTracks(testFeatures[:,[2,1]], testLabels)
 plt.title('Vessel tracks by label')
 plt.show()
-
-
-
-
-df = pd.read_csv('set3noVID.csv')
-df.sort_values('SEQUENCE_DTTM')
-bucSize = 10
-
-
-fig = plt.figure()
-ax = fig.add_subplot(111)
-plt.ion()
-plt.legend().set_draggable(True)
-plt.xlabel('Longitude')
-plt.ylabel('Latitude')
-
-for index in range(0, len(df), bucSize) :
-    temp = df.iloc[index:index + bucSize]
-    temp2 = temp[['LAT', 'LON']]
-    temp3 = temp2.to_numpy()
-    #print(temp3.shape)
-
-    plotVesselTracks(temp3, None, fig)
-
-    plt.ylim([-76.34, -75.96])
-    plt.xlim([36.90, 37.052])
-    fig.canvas.draw()
-    fig.canvas.flush_events()
-    plt.show()
-    time.sleep(0.05)
-    plt.clf()
+#
+#
+#
+#
+# df = pd.read_csv('set3noVID.csv')
+# df.sort_values('SEQUENCE_DTTM')
+# bucSize = 10
+#
+#
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
+# plt.ion()
+# plt.legend().set_draggable(True)
+# plt.xlabel('Longitude')
+# plt.ylabel('Latitude')
+#
+# for index in range(0, len(df), bucSize) :
+#     temp = df.iloc[index:index + bucSize]
+#     temp2 = temp[['LAT', 'LON']]
+#     temp3 = temp2.to_numpy()
+#     #print(temp3.shape)
+#
+#     plotVesselTracks(temp3, None, fig)
+#
+#     plt.ylim([-76.34, -75.96])
+#     plt.xlim([36.90, 37.052])
+#     fig.canvas.draw()
+#     fig.canvas.flush_events()
+#     plt.show()
+#     time.sleep(0.05)
+#     plt.clf()
     # if index%(bucSize*10) == 0 :
     #     plt.clf()
 
