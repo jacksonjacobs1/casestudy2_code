@@ -59,15 +59,15 @@ def predictWithoutK(testFeatures, trainFeatures=None, trainLabels=None):
     x, y = vectorize(vector[:, 0], vector[:, 1])
     
     # Remove speed, angle as features and add the movement vector as features
-    testFeatures = testFeatures[:, [0, 1, 2]]
-    testFeatures = np.insert(testFeatures, 3, x, axis=1)
-    testFeatures = np.insert(testFeatures, 4, y, axis=1)
+    # testFeatures = testFeatures[:, [0, 1, 2]]
+    testFeatures = np.insert(testFeatures, 5, x, axis=1)
+    testFeatures = np.insert(testFeatures, 6, y, axis=1)
 
     scaler = StandardScaler()
     testFeatures = scaler.fit_transform(testFeatures)
     print((testFeatures[:, [3,4]] * 2).shape)
 
-    testFeatures[:, [3,4]] = testFeatures[:, [3,4]] * 1.1
+    testFeatures[:, [3,4]] = testFeatures[:, [3,4]]
     # from sklearn.manifold import TSNE
     # scaledDownTestFeatures = TSNE(n_components=2, init='pca', early_exaggeration=30.0, perplexity=30.0, learning_rate='auto', n_jobs=-1).fit_transform(testFeatures)
     # umap_feats = umap.UMAP().fit_transform(testFeatures)
@@ -80,8 +80,8 @@ def predictWithoutK(testFeatures, trainFeatures=None, trainLabels=None):
     from sklearn.cluster import DBSCAN
     model = DBSCAN(eps=0.7, n_jobs=-1)
     predVessels = model.fit_predict(testFeatures)
-    newPredVessels = reduce_classes_KNN(testFeatures, predVessels, 11)
-    return newPredVessels
+    # newPredVessels = reduce_classes_KNN(testFeatures, predVessels, 11)
+    return predVessels
 
     # # Arbitrarily assume 20 vessels
     # return predictWithK(testFeatures, 20, trainFeatures, trainLabels)
