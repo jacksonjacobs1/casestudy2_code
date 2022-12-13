@@ -63,6 +63,8 @@ def predictWithoutK(testFeatures, trainFeatures=None, trainLabels=None):
     scaler = StandardScaler()
     testFeatures = scaler.fit_transform(testFeatures)
 
+    # testFeatures[:, [3]] = testFeatures[:, [3]]*2
+
     from sklearn.manifold import TSNE
     # scaledDownTestFeatures = TSNE(n_components=2, init='pca',learning_rate='auto', n_jobs=-1).fit_transform(testFeatures)
     # Unsupervised prediction, so training data is unused
@@ -87,11 +89,11 @@ def predictWithoutK(testFeatures, trainFeatures=None, trainLabels=None):
     if trainLabels is None:
         # model = DBSCAN(eps=0.7, n_jobs=-1)
         import hdbscan
-        model = hdbscan.HDBSCAN(min_cluster_size=80, min_samples=1, cluster_selection_epsilon=0.3)
+        model = hdbscan.HDBSCAN(min_cluster_size=150, min_samples=10, cluster_selection_epsilon=0.5)
         # model = OPTICS(cluster_method='dbscan', eps=0.6, n_jobs=-1)
         predVessels = model.fit_predict(testFeatures)
 
-        # predVessels = reduce_classes_KNN(testFeatures, predVessels, 11)
+        predVessels = reduce_classes_KNN(testFeatures, predVessels, 11)
 
     return predVessels
 
