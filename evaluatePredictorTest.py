@@ -16,7 +16,7 @@ from utils import loadData, plotVesselTracks
 from predictVessel import predictWithK, predictWithoutK
 
 #%% Load training and test data. Training data may not necessarily be used.
-testData = loadData('set2.csv')
+testData = loadData('set3noVID.csv')
 testFeatures = testData[:,2:]
 testLabels = testData[:,1]
 trainData = loadData('set1.csv')
@@ -60,6 +60,10 @@ plt.show()
 # df.sort_values('SEQUENCE_DTTM')
 # bucSize = 10
 #
+# plotVesselTracks(testFeatures[:,[2,1]], testLabels)
+#
+#
+#
 #
 # fig = plt.figure()
 # ax = fig.add_subplot(111)
@@ -70,21 +74,23 @@ plt.show()
 #
 # for index in range(0, len(df), bucSize) :
 #     temp = df.iloc[index:index + bucSize]
-#     temp2 = temp[['LAT', 'LON']]
+#     temp2 = temp[['LON', 'LAT']]
 #     temp3 = temp2.to_numpy()
 #     #print(temp3.shape)
 #
 #     plotVesselTracks(temp3, None, fig)
 #
-#     plt.ylim([-76.34, -75.96])
-#     plt.xlim([36.90, 37.052])
+#     plt.xlim([-76.34, -75.96])
+#     plt.ylim([36.90, 37.052])
+#     # plt.xlim ([-76.0950, -76.0876])
+#     # plt.ylim([36.906, 36.907])
 #     fig.canvas.draw()
 #     fig.canvas.flush_events()
 #     plt.show()
-#     time.sleep(0.05)
-#     plt.clf()
-    # if index%(bucSize*10) == 0 :
-    #     plt.clf()
+#     time.sleep(0.0001)
+#     #plt.clf()
+#     if index%(bucSize*10) == 0 :
+#        plt.clf()
 
 # NUM of ships = 9, 10 or 11 in set 3
 

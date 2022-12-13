@@ -30,22 +30,22 @@ def predictWithK(testFeatures, numVessels, trainFeatures=None,
     x, y = vectorize(vector[:, 0], vector[:, 1])
 
     #Remove time, speed, angle as features and add the movement vector as features
-    testFeatures = testFeatures[:, [1,2]]
-    testFeatures = np.insert(testFeatures, 2, x, axis=1)
-    testFeatures = np.insert(testFeatures, 3, y, axis=1)
+    testFeatures = testFeatures[:, [0,1,2]]
+    testFeatures = np.insert(testFeatures, 3, x, axis=1)
+    testFeatures = np.insert(testFeatures, 4, y, axis=1)
 
     scaler = StandardScaler()
     testFeatures = scaler.fit_transform(testFeatures)
 
     from sklearn.manifold import TSNE
-    scaledDownTestFeatures = TSNE(n_components=2, init='pca', early_exaggeration=30.0, perplexity=30.0,
-                                  learning_rate='auto', n_jobs=-1).fit_transform(testFeatures)
+    # scaledDownTestFeatures = TSNE(n_components=3, init='pca',
+    #                               learning_rate='auto', n_jobs=-1).fit_transform(testFeatures)
 
     # km = KMeans(n_clusters=numVessels, random_state=100)
     from sklearn.cluster import DBSCAN
     #model = DBSCAN()
-    model = AgglomerativeClustering(n_clusters=numVessels)
-   #  model = KMeans(n_clusters=numVessels, random_state=100)
+    # model = AgglomerativeClustering(n_clusters=numVessels)
+    model = KMeans(n_clusters=numVessels, random_state=100)
     predVessels = model.fit_predict(testFeatures)
 
     return predVessels
@@ -56,7 +56,7 @@ def predictWithoutK(testFeatures, trainFeatures=None, trainLabels=None):
     x, y = vectorize(vector[:, 0], vector[:, 1])
 
     # Remove time, speed, angle as features and add the movement vector as features
-    # testFeatures = testFeatures[:, [0, 1, 2]]
+    testFeatures = testFeatures[:, [0, 1, 2, 3, 4]]
     testFeatures = np.insert(testFeatures, 5, x, axis=1)
     testFeatures = np.insert(testFeatures, 6, y, axis=1)
 
@@ -64,15 +64,87 @@ def predictWithoutK(testFeatures, trainFeatures=None, trainLabels=None):
     testFeatures = scaler.fit_transform(testFeatures)
 
     from sklearn.manifold import TSNE
-    scaledDownTestFeatures = TSNE(n_components=2, init='pca', early_exaggeration=30.0, perplexity=30.0, learning_rate='auto', n_jobs=-1).fit_transform(testFeatures)
+    # scaledDownTestFeatures = TSNE(n_components=2, init='pca',learning_rate='auto', n_jobs=-1).fit_transform(testFeatures)
     # Unsupervised prediction, so training data is unused
+
     from sklearn.cluster import DBSCAN
-    model = DBSCAN(eps=0.7, n_jobs=-1)
-    predVessels = model.fit_predict(testFeatures)
+    from sklearn.cluster import OPTICS
+
+
+
+    if trainLabels is not None:
+        score = np.zeros(10)
+        params = np.arange(10) * 0.1 + 0.1
+        for i in range(0, len(params)):
+            model = DBSCAN(eps=params[i], n_jobs=-1)
+            predVessels = model.fit_predict(testFeatures)
+            score[i] = adjusted_rand_score(trainLabels, predVessels)
+            print(i, ":", score[i])
+
+        model = DBSCAN(eps=params[1], n_jobs=-1)
+        predVessels = model.fit_predict(testFeatures)
+
+    if trainLabels is None:
+        # model = DBSCAN(eps=0.7, n_jobs=-1)
+        import hdbscan
+        model = hdbscan.HDBSCAN(min_cluster_size=80, min_samples=1, cluster_selection_epsilon=0.3)
+        # model = OPTICS(cluster_method='dbscan', eps=0.6, n_jobs=-1)
+        predVessels = model.fit_predict(testFeatures)
+
+        # predVessels = reduce_classes_KNN(testFeatures, predVessels, 11)
+
     return predVessels
 
     # # Arbitrarily assume 20 vessels
     # return predictWithK(testFeatures, 20, trainFeatures, trainLabels)
+
+
+def reduce_classes_KNN(features, predictions, num_labels):
+    predictions_copy = [*predictions]
+    unique, counts = np.unique(predictions_copy, return_counts=True)
+    df = pd.DataFrame({'unique': unique, 'counts': counts})
+    df = df.sort_values(by=['counts'], ascending=False).reset_index(drop=True)
+
+    major_prediction_types = df.iloc[:num_labels]
+    minor_predictions_types = df.iloc[num_labels:]
+
+    print(predictions_copy)
+    print(minor_predictions_types)
+
+    major_idxs = []  # use to map indices of subspace to overall feature space indices
+    minor_idxs = []
+
+    major_feat_space = []
+    minor_feat_space = []
+
+    # separate feature space into two. One contains "minor class" points, and the other contains "major class" points.
+    for idx, pred in enumerate(predictions_copy):
+        if pred in minor_predictions_types['unique'].tolist():
+            minor_idxs.append(idx)
+            minor_feat_space.append(features[idx])
+        else:
+            major_idxs.append(idx)
+            major_feat_space.append(features[idx])
+
+    print(f'major feat space shape: {np.array(major_feat_space).shape}')
+    print(f'minor feat space shape: {np.array(minor_feat_space).shape}')
+
+    from sklearn.neighbors import NearestNeighbors
+    knn = NearestNeighbors(n_neighbors=1)
+    knn.fit(major_feat_space)
+
+    _, nn_inds = knn.kneighbors(minor_feat_space)
+
+    for minor_idx, item in enumerate(nn_inds):
+        item = item[0]
+        current_prediction = predictions_copy[minor_idxs[minor_idx]]
+        closest_prediction = predictions_copy[major_idxs[item]]
+
+        predictions_copy[minor_idxs[minor_idx]] = closest_prediction
+        print(f'{current_prediction} {closest_prediction}')
+
+    print(predictions_copy)
+    return np.array(predictions_copy)
 
 # given the Speed in knots and angle in Angles(thousands), convert to vector with x, y component
 def vectorize(speed, angle) :
@@ -137,8 +209,8 @@ if __name__ == "__main__":
     labels = data[:,1]
 
     #%% Plot all vessel tracks with no coloring
-    plotVesselTracks(features[:,[2,1]])
-    plt.title('All vessel tracks')
+    # plotVesselTracks(features[:,[2,1]])
+    # plt.title('All vessel tracks')
     
     #%% Run prediction algorithms and check accuracy
     
@@ -146,16 +218,18 @@ if __name__ == "__main__":
     numVessels = np.unique(labels).size
     numVessels = 10
     predVesselsWithK = predictWithK(features, numVessels)
+
     ariWithK = adjusted_rand_score(labels, predVesselsWithK)
     
     # Prediction without specified number of vessels
     predVesselsWithoutK = predictWithoutK(features)
+    # predVesselsWithoutK = predictWithoutK(features, None, labels)
 
     predNumVessels = np.unique(predVesselsWithoutK).size
 
     output = np.unique(predVesselsWithoutK, return_counts=True)
     outputDf = pd.DataFrame(output[0], output[1])
-    print(outputDf)
+    # print(outputDf)
     ariWithoutK = adjusted_rand_score(labels, predVesselsWithoutK)
     
     print(f'Adjusted Rand index given K = {numVessels}: {ariWithK}')
@@ -163,11 +237,11 @@ if __name__ == "__main__":
           + f'{ariWithoutK}')
 
     #%% Plot vessel tracks colored by prediction and actual labels
-    plotVesselTracks(features[:,[2,1]], predVesselsWithK)
-    plt.title('Vessel tracks by cluster with K')
+    # plotVesselTracks(features[:,[2,1]], predVesselsWithK)
+    # plt.title('Vessel tracks by cluster with K')
     plotVesselTracks(features[:,[2,1]], predVesselsWithoutK)
     plt.title('Vessel tracks by cluster without K')
-    plotVesselTracks(features[:,[2,1]], labels)
-    plt.title('Vessel tracks by label')
+    # plotVesselTracks(features[:,[2,1]], labels)
+    # plt.title('Vessel tracks by label')
     plt.show()
 
