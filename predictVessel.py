@@ -80,7 +80,7 @@ def predictWithoutK(testFeatures, trainFeatures=None, trainLabels=None):
     from sklearn.cluster import DBSCAN
     model = DBSCAN(eps=0.7, n_jobs=-1)
     predVessels = model.fit_predict(testFeatures)
-    # newPredVessels = reduce_classes_KNN(testFeatures, predVessels, 11)
+    predVessels = reduce_classes_KNN(testFeatures, predVessels, 11)
     return predVessels
 
     # # Arbitrarily assume 20 vessels
@@ -144,7 +144,7 @@ def mergePreviousClusters(vid, i, model, bat, numVessels) :
 if __name__ == "__main__":
     
     from utils import loadData, plotVesselTracks
-    data = loadData('set3noVID.csv')
+    data = loadData('set2.csv')
     features = data[:,2:]
     labels = data[:,1]
 
