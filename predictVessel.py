@@ -16,6 +16,7 @@ from sklearn.cluster import SpectralClustering
 from sklearn.cluster import AgglomerativeClustering
 import scipy.cluster.hierarchy as hc
 from sklearn.cluster import DBSCAN
+import hdbscan
 
 def predictWithK(testFeatures, numVessels, trainFeatures=None, 
                  trainLabels=None):
@@ -32,6 +33,7 @@ def predictWithK(testFeatures, numVessels, trainFeatures=None,
     testFeatures = scaler.fit_transform(testFeatures)
 
     model = DBSCAN(eps=0.7, n_jobs=-1, min_samples=5)
+    # model = hdbscan.HDBSCAN(min_cluster_size=60, min_samples=2, cluster_selection_epsilon=0.5)
     predVessels = model.fit_predict(testFeatures)
     predVessels = reduce_classes_KNN(testFeatures, predVessels, numVessels)
 
@@ -51,6 +53,7 @@ def predictWithoutK(testFeatures, trainFeatures=None, trainLabels=None):
     testFeatures = scaler.fit_transform(testFeatures)
 
     model = DBSCAN(eps=0.7, n_jobs=-1, min_samples=5)
+    # model = hdbscan.HDBSCAN(min_cluster_size=60, min_samples=2, cluster_selection_epsilon=0.5)
     predVessels = model.fit_predict(testFeatures)
 
     return predVessels
@@ -159,12 +162,11 @@ def mergePreviousClusters(vid, i, model, bat, numVessels) :
     return mergePreviousClusters(vid, i-1, model, bat, numVessels)
 
 
-
 # Run this code only if being used as a script, not being imported
 if __name__ == "__main__":
     
     from utils import loadData, plotVesselTracks
-    data = loadData('set3noVID.csv')
+    data = loadData('set2.csv')
     features = data[:,2:]
     labels = data[:,1]
     
@@ -172,7 +174,7 @@ if __name__ == "__main__":
     
     # Prediction with specified number of vessels
     numVessels = np.unique(labels).size
-    numVessels = 10
+    # numVessels = 10
     predVesselsWithK = predictWithK(features, numVessels)
 
     ariWithK = adjusted_rand_score(labels, predVesselsWithK)
@@ -190,8 +192,8 @@ if __name__ == "__main__":
           + f'{ariWithoutK}')
 
     #%% Plot vessel tracks colored by prediction and actual labels
-    # plotVesselTracks(features[:,[2,1]], predVesselsWithK)
-    # plt.title('Vessel tracks by cluster with K')
+    plotVesselTracks(features[:,[2,1]], predVesselsWithK)
+    plt.title('Vessel tracks by cluster with K')
     plotVesselTracks(features[:,[2,1]], predVesselsWithoutK)
     plt.title('Vessel tracks by cluster without K')
     # plotVesselTracks(features[:,[2,1]], labels)
