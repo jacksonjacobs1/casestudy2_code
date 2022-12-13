@@ -16,7 +16,7 @@ from utils import loadData, plotVesselTracks
 from predictVessel import predictWithK, predictWithoutK
 
 #%% Load training and test data. Training data may not necessarily be used.
-testData = loadData('set2.csv')
+testData = loadData('set3noVID.csv')
 testFeatures = testData[:,2:]
 testLabels = testData[:,1]
 trainData = loadData('set1.csv')
@@ -34,7 +34,7 @@ if np.unique(predVesselsWithK).size > numVessels:
 else:
     ariWithK = adjusted_rand_score(testLabels, predVesselsWithK)
 
-predVesselsWithoutK = predictWithoutK(testFeatures, trainFeatures, trainLabels)
+predVesselsWithoutK = predictWithoutK(testFeatures, trainFeatures, testLabels)
 predNumVessels = np.unique(predVesselsWithoutK).size
 
 

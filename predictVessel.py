@@ -15,6 +15,9 @@ from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
 from sklearn.cluster import AgglomerativeClustering
 import scipy.cluster.hierarchy as hc
+import matplotlib.pyplot as plt
+from utils import plotVesselTracks, reduce_classes_KNN
+import umap
 
 def predictWithK(testFeatures, numVessels, trainFeatures=None, 
                  trainLabels=None):
@@ -37,9 +40,9 @@ def predictWithK(testFeatures, numVessels, trainFeatures=None,
     scaler = StandardScaler()
     testFeatures = scaler.fit_transform(testFeatures)
 
-    from sklearn.manifold import TSNE
-    scaledDownTestFeatures = TSNE(n_components=2, init='pca', early_exaggeration=30.0, perplexity=30.0,
-                                  learning_rate='auto', n_jobs=-1).fit_transform(testFeatures)
+    # from sklearn.manifold import TSNE
+    # scaledDownTestFeatures = TSNE(n_components=2, init='pca', early_exaggeration=30.0, perplexity=30.0,
+    #                               learning_rate='auto', n_jobs=-1).fit_transform(testFeatures)
 
     # km = KMeans(n_clusters=numVessels, random_state=100)
     from sklearn.cluster import DBSCAN
@@ -54,22 +57,31 @@ def predictWithoutK(testFeatures, trainFeatures=None, trainLabels=None):
     # Takes ship speed and angle to return x,y component of ship's movement vector
     vector = testFeatures[:, [3, 4]]
     x, y = vectorize(vector[:, 0], vector[:, 1])
-
-    # Remove time, speed, angle as features and add the movement vector as features
-    # testFeatures = testFeatures[:, [0, 1, 2]]
-    testFeatures = np.insert(testFeatures, 5, x, axis=1)
-    testFeatures = np.insert(testFeatures, 6, y, axis=1)
+    
+    # Remove speed, angle as features and add the movement vector as features
+    testFeatures = testFeatures[:, [0, 1, 2]]
+    testFeatures = np.insert(testFeatures, 3, x, axis=1)
+    testFeatures = np.insert(testFeatures, 4, y, axis=1)
 
     scaler = StandardScaler()
     testFeatures = scaler.fit_transform(testFeatures)
+    print((testFeatures[:, [3,4]] * 2).shape)
 
-    from sklearn.manifold import TSNE
-    scaledDownTestFeatures = TSNE(n_components=2, init='pca', early_exaggeration=30.0, perplexity=30.0, learning_rate='auto', n_jobs=-1).fit_transform(testFeatures)
+    testFeatures[:, [3,4]] = testFeatures[:, [3,4]] * 1.1
+    # from sklearn.manifold import TSNE
+    # scaledDownTestFeatures = TSNE(n_components=2, init='pca', early_exaggeration=30.0, perplexity=30.0, learning_rate='auto', n_jobs=-1).fit_transform(testFeatures)
+    # umap_feats = umap.UMAP().fit_transform(testFeatures)
+    # print(scaledDownTestFeatures.shape)
+    # plotVesselTracks(scaledDownTestFeatures)
+    # plt.title("TSNE embedding")
+    # plotVesselTracks(umap_feats)
+    # plt.title("UMAP embedding")
     # Unsupervised prediction, so training data is unused
     from sklearn.cluster import DBSCAN
     model = DBSCAN(eps=0.7, n_jobs=-1)
     predVessels = model.fit_predict(testFeatures)
-    return predVessels
+    newPredVessels = reduce_classes_KNN(testFeatures, predVessels, 11)
+    return newPredVessels
 
     # # Arbitrarily assume 20 vessels
     # return predictWithK(testFeatures, 20, trainFeatures, trainLabels)
